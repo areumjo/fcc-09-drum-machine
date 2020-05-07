@@ -1,44 +1,56 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
+
+const inactive = {
+    backgroundColor: "#D4D5D7"
+}
+const active = {
+    backgroundColor : "#506680"
+}
 
 const Drumpad = props => {
-    console.log('props from Drumpad: ', props);
+
+    const [drumColor, setDrumColor] = useState({
+        pad: inactive
+    });
+
+    const activatePad = () => {
+        setDrumColor({ pad: active})
+        setTimeout(() => setDrumColor({ pad: inactive}), 100);
+    }
 
     const playSound = e => {
-        console.log('key clicked', e)
         const sound = document.getElementById(props.keyTrigger);
-        sound.currentTime = 0;
         sound.play();
-        // this.activatePad();
-        // setTimeout(() => this.activatePad(), 100);
-        // this.props.updateDisplay(this.props.clipId.replace(/-/g, ' '));
-      }
+        props.setPlayingSound(props.clipId)
+        activatePad();
+    }
 
     const handleKeyDown = e => {
         if (e.keyCode === props.keyCode) {
-            console.log('keyboard down: handleKeyDown', e)
             playSound();
+            activatePad();
+            setTimeout(() => activatePad(), 100);
+            props.setPlayingSound(props.clipId)
         }
     }
 
     useEffect(() => {
-        document.addEventListener('keydown', handleKeyDown)
-        // document.addEventListener('keyup', handleKeyUp)
-      
+        document.addEventListener('keydown', handleKeyDown);
         return () => {
-          document.removeEventListener('keydown', handleKeyDown)
-        //   document.removeEventListener('keyup', handleKeyUp)
-        }
-      }, [handleKeyDown]);
+            document.removeEventListener('keydown', handleKeyDown)
+            }
+        }, [handleKeyDown]);
 
-    return (
-        <div className="drum-pad">
+        return (
+        <div className="drum-pad" id={props.clipId} >
             <div 
-                className="oneKeyboard"
-                onClick={playSound}>
+                className="inner-drum-pad"
+                onClick={playSound}
+                style={drumColor.pad}>
+                <audio className='clip' id={props.keyTrigger} src={props.clip}></audio>
                 {props.keyTrigger}
             </div>
-            <audio className='clip' id={props.keyTrigger} src={props.clip}></audio>
         </div>
     )
 }
